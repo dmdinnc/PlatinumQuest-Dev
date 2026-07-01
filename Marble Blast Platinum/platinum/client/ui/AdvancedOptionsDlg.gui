@@ -41,7 +41,7 @@ new GuiControl(AdvancedOptionsDlg) {
 		horizSizing = "center";
 		vertSizing = "center";
 		position = "89 100";
-		extent = "675 475";
+		extent = "675 500";
 		minExtent = "61 61";
 		visible = "1";
 		helpTag = "0";
@@ -52,7 +52,7 @@ new GuiControl(AdvancedOptionsDlg) {
 			horizSizing = "right";
 			vertSizing = "bottom";
 			position = "25 55";
-			extent = "625 375";
+			extent = "625 400";
 			minExtent = "61 61";
 			visible = "1";
 			helpTag = "0";
@@ -63,7 +63,7 @@ new GuiControl(AdvancedOptionsDlg) {
 			profile = "PQButtonProfile";
 			horizSizing = "center";
 			vertSizing = "top";
-			position = "350 409";
+			position = "350 434";
 			extent = "94 45";
 			minExtent = "8 8";
 			visible = "1";
@@ -251,7 +251,7 @@ function AdvancedOptionsDlg::buildGUI(%this) {
 	AdvancedOptionsContent.clear();
 
 	%curYPos = 0;
-	%rowsPerCol = 12;
+	%rowsPerCol = 13;
 
 	for (%i = 0; $AdvancedOptions::Name[%i] !$= ""; %i ++) {
 		%name = $AdvancedOptions::Name[%i];
@@ -289,8 +289,10 @@ function AdvancedOptionsDlg::buildGUI(%this) {
 		}
 	}
 
-	AdvOpt_timeTravelTimerPrecise.position = 30 SPC getWord(AdvOpt_timeTravelTimerPrecise.position, 1);
-	AdvOpt_timeTravelTimerPrecise.setActive($pref::timeTravelTimer > 0);
+	if (isObject(AdvOpt_timeTravelTimerPrecise)) {
+		AdvOpt_timeTravelTimerPrecise.position = 30 SPC getWord(AdvOpt_timeTravelTimerPrecise.position, 1);
+		AdvOpt_timeTravelTimerPrecise.setActive($pref::timeTravelTimer > 0);
+	}
 }
 
 function AdvancedOptions_spchangesFnc() {
@@ -304,20 +306,19 @@ function AdvancedOptions_spchangesFnc() {
 // }
 
 // function AdvancedOptions_timeTravelTimerPreciseFnc() {
-// 	if ($AdvOptTimeTravelTimerVar)
-// 		$pref::timeTravelTimer = $AdvOptTimeTravelTimerPreciseVar ? 2 : 1;
-// 	else
-// 		$pref::timeTravelTimer = 0;
-// 	PlayGui.updateTimeTravelCountdown();
+// 	if ($pref::timeTravelTimer == 2)
+// 		$pref::timeTravelTimer = 1;
+// 	else if ($pref::timeTravelTimer == 1)
+// 		$pref::timeTravelTimer = 2;
 // }
 
-function AdvancedOptions_scorePredictorMaxFactorFnc() {
-	$pref::scorePredictorMaxFactor = $AdvOptScorePredictorMaxFactorVar ? 0 : 2;
+function AdvancedOptions_legacyItemsFnc() {
+	// Reload the level if we're in one
+	if ($Game::Running $= "1") {
+		MessageBoxOK("Restart Required", "Changes to this setting will take effect after restarting the level.");
+	}
 }
 
-function AdvancedOptions_legacyItemsFnc() {
-	if (!$liAssert) {
-		$liAssert = true;
-		restartAssert();
-	}
+function AdvancedOptions_scorePredictorMaxFactorFnc() {
+	$pref::scorePredictorMaxFactor = !$AdvOptScorePredictorMaxFactorVar;
 }

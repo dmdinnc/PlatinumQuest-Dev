@@ -136,6 +136,7 @@ function PlayGui::onWake(%this) {
 	RadarSetMode($Pref::RadarMode);
 	clearMessages();
 	applyGraphicsQuality();
+	%this.applyUISettings();
 
 	%this.positionMessageHud();
 	%this.onNextFrame(positionMessageHud);
@@ -1514,4 +1515,155 @@ function PlayGui::startCountdownLeft(%this, %time, %image) {
 
 function PlayGui::updateRtaSpeedrunTimer(%this, %text) {
 	PG_RtaSpeedrunTimer.setText("<condensed:48><color:FFFFFF><shadow:2:2><shadowcolor:777777>" @ %text);
+}
+
+function PlayGui::getHudAnchorName(%anchor) {
+	switch (%anchor) {
+	case 0: return "Top Left";
+	case 1: return "Top Center";
+	case 2: return "Top Right";
+	case 3: return "Middle Left";
+	case 4: return "Center";
+	case 5: return "Middle Right";
+	case 6: return "Bottom Left";
+	case 7: return "Bottom Center";
+	case 8: return "Bottom Right";
+	default: return "Center";
+	}
+}
+
+function HudLayout::getPref(%element, %field, %default) {
+	%value = eval("return $pref::HudLayout::" @ %element @ "::" @ %field @ ";");
+	if (%value $= "")
+		return %default;
+	return %value;
+}
+
+function HudLayout::setPref(%element, %field, %value) {
+	eval("$pref::HudLayout::" @ %element @ "::" @ %field @ " = " @ %value @ ";");
+}
+
+function HudLayout::getPresetValue(%preset, %element, %field, %default) {
+	%value = eval("return $HudLayout::" @ %preset @ "::" @ %element @ "::" @ %field @ ";");
+	if (%value $= "")
+		return %default;
+	return %value;
+}
+
+function PlayGui::resolveHudAnchorPoint(%anchor, %screenExtent) {
+	%w = getWord(%screenExtent, 0);
+	%h = getWord(%screenExtent, 1);
+	switch (%anchor) {
+	case 0: return "0 0";
+	case 1: return mFloor(%w / 2) SPC "0";
+	case 2: return %w SPC "0";
+	case 3: return "0" SPC mFloor(%h / 2);
+	case 4: return mFloor(%w / 2) SPC mFloor(%h / 2);
+	case 5: return %w SPC mFloor(%h / 2);
+	case 6: return "0" SPC %h;
+	case 7: return mFloor(%w / 2) SPC %h;
+	case 8: return %w SPC %h;
+	default: return mFloor(%w / 2) SPC mFloor(%h / 2);
+	}
+}
+
+function PlayGui::getHudAnchorOffsetForExtent(%anchor, %extent) {
+	%w = getWord(%extent, 0);
+	%h = getWord(%extent, 1);
+	%col = %anchor % 3;          // 0=left, 1=center, 2=right
+	%row = mFloor(%anchor / 3);  // 0=top, 1=middle, 2=bottom
+
+	if (%col == 0)
+		%ox = 0;
+	else if (%col == 1)
+		%ox = mFloor(%w / 2);
+	else
+		%ox = %w;
+
+	if (%row == 0)
+		%oy = 0;
+	else if (%row == 1)
+		%oy = mFloor(%h / 2);
+	else
+		%oy = %h;
+
+	return %ox SPC %oy;
+}
+
+function PlayGui::setHudControlFromPrefs(%this, %controlName, %prefKey, %defaultHoriz, %defaultVert, %defaultPos, %alignToAnchor) {
+	if (!isObject(%controlName))
+		return;
+
+	%screenExtent = Canvas.getExtent();
+	%anchor = HudLayout::getPref(%prefKey, "Anchor", 4);
+	%offsetX = HudLayout::getPref(%prefKey, "OffsetX", 0);
+	%offsetY = HudLayout::getPref(%prefKey, "OffsetY", 0);
+	%anchorPos = PlayGui::resolveHudAnchorPoint(%anchor, %screenExtent);
+	%x = getWord(%anchorPos, 0) + %offsetX;
+	%y = getWord(%anchorPos, 1) + %offsetY;
+
+	%controlName.horizSizing = "center";
+	%controlName.vertSizing = "center";
+	if (%alignToAnchor) {
+		%extent = %controlName.getExtent();
+		%align = PlayGui::getHudAnchorOffsetForExtent(%anchor, %extent);
+		%x -= getWord(%align, 0);
+		%y -= getWord(%align, 1);
+	}
+	%controlName.setPosition(%x SPC %y);
+}
+
+function PlayGui::setHudControlFromProfile(%this, %controlName, %prefKey, %alignToAnchor, %profile) {
+	if (!isObject(%controlName))
+		return;
+
+	%screenExtent = Canvas.getExtent();
+	%anchor = HudLayout::getPresetValue(%profile, %prefKey, "Anchor", 4);
+	%offsetX = HudLayout::getPresetValue(%profile, %prefKey, "OffsetX", 0);
+	%offsetY = HudLayout::getPresetValue(%profile, %prefKey, "OffsetY", 0);
+	%anchorPos = PlayGui::resolveHudAnchorPoint(%anchor, %screenExtent);
+	%x = getWord(%anchorPos, 0) + %offsetX;
+	%y = getWord(%anchorPos, 1) + %offsetY;
+
+	%controlName.horizSizing = "center";
+	%controlName.vertSizing = "center";
+	if (%alignToAnchor) {
+		%extent = %controlName.getExtent();
+		%align = PlayGui::getHudAnchorOffsetForExtent(%anchor, %extent);
+		%x -= getWord(%align, 0);
+		%y -= getWord(%align, 1);
+	}
+	%controlName.setPosition(%x SPC %y);
+}
+
+function PlayGui::applyUISettings(%this) {
+	%mode = $pref::HudLayoutMode;
+	if (%mode $= "")
+		%mode = 0;
+
+	if (%mode == 0) {
+		// Default profile: use the Default preset values
+		%this.setHudControlFromProfile("PG_GemCounter", "Gem", true, "Default");
+		%this.setHudControlFromProfile("PG_Timer", "Timer", true, "Default");
+		%this.setHudControlFromProfile("PG_TimerThousands", "Timer", true, "Default");
+		%this.setHudControlFromProfile("HUD_PowerupBackground", "Powerup", true, "Default");
+		%this.setHudControlFromProfile("HUD_ShowPowerUp", "Powerup", true, "Default");
+		%this.setHudControlFromProfile("PG_BlastBar", "Blast", true, "Default");
+	} else if (%mode == 1) {
+		// Centered profile: use the Centered preset values
+		%this.setHudControlFromProfile("PG_GemCounter", "Gem", true, "Centered");
+		%this.setHudControlFromProfile("PG_Timer", "Timer", true, "Centered");
+		%this.setHudControlFromProfile("PG_TimerThousands", "Timer", true, "Centered");
+		%this.setHudControlFromProfile("HUD_PowerupBackground", "Powerup", true, "Centered");
+		%this.setHudControlFromProfile("HUD_ShowPowerUp", "Powerup", true, "Centered");
+		%this.setHudControlFromProfile("PG_BlastBar", "Blast", true, "Centered");
+	} else {
+		// Custom profile: use per-element local prefs
+		%this.setHudControlFromPrefs("PG_GemCounter", "Gem", "right", "bottom", "0 0", true);
+		%this.setHudControlFromPrefs("PG_Timer", "Timer", "center", "bottom", "219 0", true);
+		%this.setHudControlFromPrefs("PG_TimerThousands", "Timer", "center", "bottom", "213 0", true);
+		%this.setHudControlFromPrefs("HUD_PowerupBackground", "Powerup", "left", "bottom", "698 6", true);
+		%this.setHudControlFromPrefs("HUD_ShowPowerUp", "Powerup", "left", "bottom", "712 18", true);
+		%this.setHudControlFromPrefs("PG_BlastBar", "Blast", "right", "top", "6 565", true);
+	}
 }

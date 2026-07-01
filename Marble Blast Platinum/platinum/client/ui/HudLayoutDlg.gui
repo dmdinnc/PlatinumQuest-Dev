@@ -1,0 +1,882 @@
+//-----------------------------------------------------------------------------
+// HUD Layout Options
+//-----------------------------------------------------------------------------
+
+// Colored marker profiles for preview circles (must be defined before GUI objects)
+if (!isObject(HudLayoutMarkerGemProfile)) new GuiControlProfile(HudLayoutMarkerGemProfile) {
+	opaque = true;
+	border = false;
+	fillColor = "184 134 11";
+};
+if (!isObject(HudLayoutMarkerTimerProfile)) new GuiControlProfile(HudLayoutMarkerTimerProfile) {
+	opaque = true;
+	border = false;
+	fillColor = "85 85 85";
+};
+if (!isObject(HudLayoutMarkerPowerupProfile)) new GuiControlProfile(HudLayoutMarkerPowerupProfile) {
+	opaque = true;
+	border = false;
+	fillColor = "0 102 34";
+};
+if (!isObject(HudLayoutMarkerBlastProfile)) new GuiControlProfile(HudLayoutMarkerBlastProfile) {
+	opaque = true;
+	border = false;
+	fillColor = "170 51 0";
+};
+if (!isObject(HudLayoutDisabledRowProfile)) new GuiControlProfile(HudLayoutDisabledRowProfile) {
+	opaque = true;
+	border = false;
+	fillColor = "170 170 170 120";
+};
+
+//--- OBJECT WRITE BEGIN ---
+new GuiControl(HudLayoutDlg) {
+	profile = "GuiDefaultProfile";
+	horizSizing = "width";
+	vertSizing = "height";
+	position = "0 0";
+	extent = "800 600";
+	minExtent = "8 8";
+	visible = "1";
+	helpTag = "0";
+	_guiSize = "800 600";
+	defaultControl = "HudLayoutClose";
+	commandSelect = "RootGui.popDialog(HudLayoutDlg);";
+	commandCancel = "RootGui.popDialog(HudLayoutDlg);";
+	commandNameSelect = "Close";
+
+	new GuiControl(HudLayoutBody) {
+		profile = "PQWindowProfile";
+		horizSizing = "center";
+		vertSizing = "center";
+		position = "10 10";
+		extent = "780 580";
+		minExtent = "61 61";
+		visible = "1";
+		helpTag = "0";
+		wrap = "0";
+
+		new GuiMLTextCtrl(HudLayoutTitleText) {
+			profile = "GuiMLTextProfile";
+			horizSizing = "center";
+			vertSizing = "bottom";
+			position = "0 10";
+			extent = "780 36";
+			minExtent = "8 8";
+			visible = "1";
+			helpTag = "0";
+			lineSpacing = "2";
+			allowColorChars = "0";
+			maxChars = "-1";
+			defaultText = "<bold:32><just:center>HUD Layout";
+		};
+
+		new GuiMLTextCtrl(HudLayoutModeLabel) {
+			profile = "GuiMLTextProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "200 52";
+			extent = "160 32";
+			minExtent = "8 8";
+			visible = "1";
+			helpTag = "0";
+			lineSpacing = "2";
+			allowColorChars = "0";
+			maxChars = "-1";
+			defaultText = "<bold:24>Layout Mode:";
+		};
+
+		new GuiMLTextCtrl(HudLayoutModeDisplay) {
+			profile = "GuiMLTextProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "370 52";
+			extent = "140 32";
+			minExtent = "8 8";
+			visible = "1";
+			helpTag = "0";
+			lineSpacing = "2";
+			allowColorChars = "0";
+			maxChars = "-1";
+		};
+
+		new GuiBorderButtonCtrl(HudLayoutModeLeft) {
+			profile = "GuiBorderButtonProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "520 48";
+			extent = "44 44";
+			minExtent = "8 8";
+			visible = "1";
+			command = "HudLayoutDlg::modeDecrease();";
+			helpTag = "0";
+			text = "<";
+			groupNum = "-1";
+			buttonType = "PushButton";
+			repeatPeriod = "1000";
+			repeatDecay = "1";
+		};
+
+		new GuiBorderButtonCtrl(HudLayoutModeRight) {
+			profile = "GuiBorderButtonProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "570 48";
+			extent = "44 44";
+			minExtent = "8 8";
+			visible = "1";
+			command = "HudLayoutDlg::modeIncrease();";
+			helpTag = "0";
+			text = ">";
+			groupNum = "-1";
+			buttonType = "PushButton";
+			repeatPeriod = "1000";
+			repeatDecay = "1";
+		};
+
+		// Preview panel (left side)
+		new GuiControl(HudLayoutPreviewPanel) {
+			profile = "PQWindowProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "20 100";
+			extent = "300 420";
+			minExtent = "8 8";
+			visible = "1";
+			helpTag = "0";
+
+			new GuiMLTextCtrl(HudLayoutPreviewTitle) {
+				profile = "GuiMLTextProfile";
+				horizSizing = "center";
+				vertSizing = "bottom";
+				position = "0 8";
+				extent = "300 28";
+				minExtent = "8 8";
+				visible = "1";
+				helpTag = "0";
+				lineSpacing = "2";
+				allowColorChars = "0";
+				maxChars = "-1";
+				defaultText = "<bold:24><just:center>Preview";
+			};
+
+			// Preview screen border box
+			new GuiControl(HudLayoutPreviewScreen) {
+				profile = "GuiSolidDefaultProfile";
+				horizSizing = "left";
+				vertSizing = "top";
+				position = "30 40";
+				extent = "240 180";
+				minExtent = "8 8";
+				visible = "1";
+				helpTag = "0";
+			};
+
+			// Center crosshair
+			new GuiMLTextCtrl(HudLayoutPreviewCenter) {
+				profile = "GuiMLTextProfile";
+				horizSizing = "left";
+				vertSizing = "top";
+				position = "30 40";
+				extent = "30 24";
+				minExtent = "8 8";
+				visible = "1";
+				helpTag = "0";
+				lineSpacing = "2";
+				allowColorChars = "0";
+				maxChars = "-1";
+				defaultText = "<bold:18><just:center><color:888888>+";
+			};
+
+			// Colored circle markers (12x12 each)
+			new GuiControl(HudLayoutPreviewGem) {
+				profile = "HudLayoutMarkerGemProfile";
+				horizSizing = "left";
+				vertSizing = "top";
+				position = "30 40";
+				extent = "12 12";
+				minExtent = "8 8";
+				visible = "1";
+				helpTag = "0";
+			};
+
+			new GuiControl(HudLayoutPreviewTimer) {
+				profile = "HudLayoutMarkerTimerProfile";
+				horizSizing = "left";
+				vertSizing = "top";
+				position = "30 40";
+				extent = "12 12";
+				minExtent = "8 8";
+				visible = "1";
+				helpTag = "0";
+			};
+
+			new GuiControl(HudLayoutPreviewPowerup) {
+				profile = "HudLayoutMarkerPowerupProfile";
+				horizSizing = "left";
+				vertSizing = "top";
+				position = "30 40";
+				extent = "12 12";
+				minExtent = "8 8";
+				visible = "1";
+				helpTag = "0";
+			};
+
+			new GuiControl(HudLayoutPreviewBlast) {
+				profile = "HudLayoutMarkerBlastProfile";
+				horizSizing = "left";
+				vertSizing = "top";
+				position = "30 40";
+				extent = "12 12";
+				minExtent = "8 8";
+				visible = "1";
+				helpTag = "0";
+			};
+
+			new GuiMLTextCtrl(HudLayoutPreviewLegend) {
+				profile = "GuiMLTextProfile";
+				horizSizing = "center";
+				vertSizing = "bottom";
+				position = "0 250";
+				extent = "300 30";
+				minExtent = "8 8";
+				visible = "1";
+				helpTag = "0";
+				lineSpacing = "4";
+				allowColorChars = "0";
+				maxChars = "-1";
+				defaultText = "<just:center><color:B8860B><bold:16>Score   <color:555555>Time   <color:006622>Item   <color:AA3300>Blast";
+			};
+		};
+
+		// Controls panel (right side)
+		new GuiControl(HudLayoutContent) {
+			profile = "PQWindowProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "330 100";
+			extent = "440 420";
+			minExtent = "8 8";
+			visible = "1";
+			helpTag = "0";
+		};
+
+		new GuiBorderButtonCtrl(HudLayoutReset) {
+			profile = "PQButtonProfile";
+			horizSizing = "left";
+			vertSizing = "top";
+			position = "240 530";
+			extent = "180 34";
+			minExtent = "8 8";
+			visible = "1";
+			command = "HudLayoutDlg.resetDefaults();";
+			helpTag = "0";
+			text = "Reset Defaults";
+			groupNum = "-1";
+			buttonType = "PushButton";
+			repeatPeriod = "1000";
+			repeatDecay = "1";
+		};
+
+		new GuiBorderButtonCtrl(HudLayoutClose) {
+			profile = "PQButtonProfile";
+			horizSizing = "left";
+			vertSizing = "top";
+			position = "440 530";
+			extent = "104 34";
+			minExtent = "8 8";
+			visible = "1";
+			command = "RootGui.popDialog(HudLayoutDlg);";
+			accelerator = "return";
+			helpTag = "0";
+			text = "Back";
+			groupNum = "-1";
+			buttonType = "PushButton";
+			repeatPeriod = "1000";
+			repeatDecay = "1";
+		};
+	};
+};
+//--- OBJECT WRITE END ---
+
+$HudLayout::ElementCount = 4;
+$HudLayout::ElementName[0] = "Gem";
+$HudLayout::ElementTitle[0] = "Score";
+$HudLayout::ElementColor[0] = "B8860B";
+$HudLayout::ElementName[1] = "Timer";
+$HudLayout::ElementTitle[1] = "Timer";
+$HudLayout::ElementColor[1] = "555555";
+$HudLayout::ElementName[2] = "Powerup";
+$HudLayout::ElementTitle[2] = "Item";
+$HudLayout::ElementColor[2] = "006622";
+$HudLayout::ElementName[3] = "Blast";
+$HudLayout::ElementTitle[3] = "Blast";
+$HudLayout::ElementColor[3] = "AA3300";
+
+$HudLayout::ModeCount = 3;
+$HudLayout::ModeName[0] = "Default";
+$HudLayout::ModeName[1] = "Centered";
+$HudLayout::ModeName[2] = "Custom";
+
+// Slider range for pixel offsets
+$HudLayout::MaxOffset = 500;
+
+// Default profile (anchor-first layout)
+// Score: top-left, Timer: top-center, Item: top-right, Blast: bottom-left.
+$HudLayout::Default::Gem::Anchor = 0;
+$HudLayout::Default::Gem::OffsetX = 0;
+$HudLayout::Default::Gem::OffsetY = 0;
+$HudLayout::Default::Timer::Anchor = 1;
+$HudLayout::Default::Timer::OffsetX = 0;
+$HudLayout::Default::Timer::OffsetY = 0;
+$HudLayout::Default::Powerup::Anchor = 2;
+$HudLayout::Default::Powerup::OffsetX = 0;
+$HudLayout::Default::Powerup::OffsetY = 0;
+$HudLayout::Default::Blast::Anchor = 6;
+$HudLayout::Default::Blast::OffsetX = 0;
+$HudLayout::Default::Blast::OffsetY = 0;
+
+// Centered profile
+$HudLayout::Centered::Gem::Anchor = 0;
+$HudLayout::Centered::Gem::OffsetX = 0;
+$HudLayout::Centered::Gem::OffsetY = 0;
+$HudLayout::Centered::Timer::Anchor = 1;
+$HudLayout::Centered::Timer::OffsetX = 0;
+$HudLayout::Centered::Timer::OffsetY = 0;
+$HudLayout::Centered::Powerup::Anchor = 4;
+$HudLayout::Centered::Powerup::OffsetX = 0;
+$HudLayout::Centered::Powerup::OffsetY = 150;
+$HudLayout::Centered::Blast::Anchor = 4;
+$HudLayout::Centered::Blast::OffsetX = 0;
+$HudLayout::Centered::Blast::OffsetY = 222;
+
+// Preview area within HudLayoutPreviewPanel (300x420)
+$HudLayout::PreviewWidth = 240;
+$HudLayout::PreviewHeight = 180;
+$HudLayout::PreviewOffsetX = 30;
+$HudLayout::PreviewOffsetY = 40;
+
+function HudLayoutDlg::onWake(%this) {
+	%this.buildGUI();
+	%this.refreshModeState();
+}
+
+function HudLayoutDlg::updatePreview(%this) {
+	%mode = $pref::HudLayoutMode;
+	if (%mode $= "")
+		%mode = 0;
+
+	%pw = $HudLayout::PreviewWidth;
+	%ph = $HudLayout::PreviewHeight;
+	%ox = $HudLayout::PreviewOffsetX;
+	%oy = $HudLayout::PreviewOffsetY;
+
+	// Position the center crosshair at the center of the preview screen
+	if (isObject(HudLayoutPreviewCenter)) {
+		%cx = %ox + mFloor(%pw / 2) - 15;
+		%cy = %oy + mFloor(%ph / 2) - 12;
+		HudLayoutPreviewCenter.resize(%cx, %cy, 30, 24);
+	}
+
+	for (%i = 0; %i < $HudLayout::ElementCount; %i++) {
+		%name = $HudLayout::ElementName[%i];
+		%marker = "HudLayoutPreview" @ %name;
+		if (!isObject(%marker))
+			continue;
+
+		// Get values based on mode
+		if (%mode == 0) {
+			%anchor = HudLayout::getPresetValue("Default", %name, "Anchor", 4);
+			%offsetX = HudLayout::getPresetValue("Default", %name, "OffsetX", 0);
+			%offsetY = HudLayout::getPresetValue("Default", %name, "OffsetY", 0);
+		} else if (%mode == 1) {
+			%anchor = HudLayout::getPresetValue("Centered", %name, "Anchor", 4);
+			%offsetX = HudLayout::getPresetValue("Centered", %name, "OffsetX", 0);
+			%offsetY = HudLayout::getPresetValue("Centered", %name, "OffsetY", 0);
+		} else {
+			%anchor = HudLayout::getPref(%name, "Anchor", 4);
+			%offsetX = HudLayout::getPref(%name, "OffsetX", 0);
+			%offsetY = HudLayout::getPref(%name, "OffsetY", 0);
+		}
+
+		// Calculate anchor position in preview (0,0 = top-left, pw,ph = bottom-right)
+		%col = %anchor % 3;
+		%row = mFloor(%anchor / 3);
+		if (%col == 0) %ax = 0;
+		else if (%col == 1) %ax = mFloor(%pw / 2);
+		else %ax = %pw;
+		if (%row == 0) %ay = 0;
+		else if (%row == 1) %ay = mFloor(%ph / 2);
+		else %ay = %ph;
+
+		// Scale pixel offset to preview (500px max -> half preview width)
+		%px = %ax + mFloor(%offsetX / $HudLayout::MaxOffset * (%pw / 2));
+		%py = %ay + mFloor(%offsetY / $HudLayout::MaxOffset * (%ph / 2));
+
+		// Marker shows the anchor point used for the element:
+		// align square corner/edge/center to match anchor semantics.
+		if (%col == 0)
+			%px -= 0;
+		else if (%col == 1)
+			%px -= 6;
+		else
+			%px -= 12;
+
+		if (%row == 0)
+			%py -= 0;
+		else if (%row == 1)
+			%py -= 6;
+		else
+			%py -= 12;
+
+		// Clamp to preview bounds
+		if (%px < 0) %px = 0;
+		if (%py < 0) %py = 0;
+		if (%px > %pw - 12) %px = %pw - 12;
+		if (%py > %ph - 12) %py = %ph - 12;
+
+		// Convert to absolute position within preview panel
+		%finalX = %ox + %px;
+		%finalY = %oy + %py;
+
+		%marker.resize(%finalX, %finalY, 12, 12);
+	}
+}
+
+function HudLayoutDlg::buildGUI(%this) {
+	HudLayoutContent.clear();
+
+	%rowHeight = 104;
+	for (%i = 0; %i < $HudLayout::ElementCount; %i++) {
+		%name = $HudLayout::ElementName[%i];
+		%title = $HudLayout::ElementTitle[%i];
+		%color = $HudLayout::ElementColor[%i];
+		%y = %i * %rowHeight;
+		%row = new GuiControl("HudLayoutRow" @ %name) {
+			profile = "GuiDefaultProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "0" SPC %y;
+			extent = "440 100";
+			minExtent = "8 8";
+			visible = "1";
+			helpTag = "0";
+		};
+
+		// Title - colored dot + black title text
+		%titleCtrl = new GuiMLTextCtrl("HudLayoutTitle" @ %name) {
+			profile = "GuiMLTextProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "8 2";
+			extent = "200 30";
+			minExtent = "8 8";
+			visible = "1";
+			helpTag = "0";
+			lineSpacing = "2";
+			allowColorChars = "0";
+			maxChars = "-1";
+		};
+		%row.add(%titleCtrl);
+		%titleCtrl.setText("<bold:24><color:" @ %color @ ">o<color:000000> " @ %title);
+
+		// --- Anchor section (left side, y=40) ---
+		%anchorLabel = new GuiMLTextCtrl("HudLayoutAnchorLabel" @ %name) {
+			profile = "GuiMLTextProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "8 44";
+			extent = "60 26";
+			minExtent = "8 8";
+			visible = "1";
+			helpTag = "0";
+			lineSpacing = "2";
+			allowColorChars = "0";
+			maxChars = "-1";
+		};
+		%row.add(%anchorLabel);
+		%anchorLabel.setText("<bold:20>Anchor");
+
+		%row.add(new GuiBorderButtonCtrl("HudLayoutAnchorDec" @ %name) {
+			profile = "GuiBorderButtonProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "72 40";
+			extent = "36 36";
+			minExtent = "8 8";
+			visible = "1";
+			command = "HudLayoutDlg.shiftAnchor(\"" @ %name @ "\", -1);";
+			helpTag = "0";
+			text = "<";
+			groupNum = "-1";
+			buttonType = "PushButton";
+			repeatPeriod = "400";
+			repeatDecay = "1";
+		});
+
+		%anchorValue = new GuiMLTextCtrl("HudLayoutAnchorValue" @ %name) {
+			profile = "GuiMLTextProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "112 44";
+			extent = "90 26";
+			minExtent = "8 8";
+			visible = "1";
+			helpTag = "0";
+			lineSpacing = "2";
+			allowColorChars = "0";
+			maxChars = "-1";
+		};
+		%row.add(%anchorValue);
+
+		%row.add(new GuiBorderButtonCtrl("HudLayoutAnchorInc" @ %name) {
+			profile = "GuiBorderButtonProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "206 40";
+			extent = "36 36";
+			minExtent = "8 8";
+			visible = "1";
+			command = "HudLayoutDlg.shiftAnchor(\"" @ %name @ "\", 1);";
+			helpTag = "0";
+			text = ">";
+			groupNum = "-1";
+			buttonType = "PushButton";
+			repeatPeriod = "400";
+			repeatDecay = "1";
+		});
+
+		// --- X slider (right of anchor, same row y=40) ---
+		%xLabel = new GuiMLTextCtrl("HudLayoutOffsetXLabel" @ %name) {
+			profile = "GuiMLTextProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "252 44";
+			extent = "20 26";
+			minExtent = "8 8";
+			visible = "1";
+			helpTag = "0";
+			lineSpacing = "2";
+			allowColorChars = "0";
+			maxChars = "-1";
+		};
+		%row.add(%xLabel);
+		%xLabel.setText("<bold:20>X");
+
+		// X slider bar background
+		%row.add(new GuiBitmapCtrl("HudLayoutOffsetXBar" @ %name) {
+			profile = "GuiDefaultProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "274 53";
+			extent = "100 10";
+			minExtent = "8 8";
+			visible = "1";
+			helpTag = "0";
+			bitmap = "~/client/ui/options/slider_bar";
+			wrap = "0";
+		});
+
+		// X slider
+		%row.add(new GuiSliderCtrl("HudLayoutOffsetXSlider" @ %name) {
+			profile = "GuiSliderProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "264 40";
+			extent = "120 36";
+			minExtent = "8 8";
+			visible = "1";
+			altCommand = "HudLayoutDlg.sliderChanged(\"" @ %name @ "\", \"X\");";
+			helpTag = "0";
+			range = "-500 500";
+			ticks = 1000;
+			value = 0;
+			bitmap = "~/client/ui/options/slider";
+		});
+
+		%row.add(new GuiMLTextCtrl("HudLayoutOffsetXDisplay" @ %name) {
+			profile = "GuiMLTextProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "390 44";
+			extent = "50 26";
+			minExtent = "8 8";
+			visible = "1";
+			helpTag = "0";
+			lineSpacing = "2";
+			allowColorChars = "0";
+			maxChars = "-1";
+		});
+
+		// --- Y slider (below X, y=70) ---
+		%yLabel = new GuiMLTextCtrl("HudLayoutOffsetYLabel" @ %name) {
+			profile = "GuiMLTextProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "252 74";
+			extent = "20 26";
+			minExtent = "8 8";
+			visible = "1";
+			helpTag = "0";
+			lineSpacing = "2";
+			allowColorChars = "0";
+			maxChars = "-1";
+		};
+		%row.add(%yLabel);
+		%yLabel.setText("<bold:20>Y");
+
+		// Y slider bar background
+		%row.add(new GuiBitmapCtrl("HudLayoutOffsetYBar" @ %name) {
+			profile = "GuiDefaultProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "274 83";
+			extent = "100 10";
+			minExtent = "8 8";
+			visible = "1";
+			helpTag = "0";
+			bitmap = "~/client/ui/options/slider_bar";
+			wrap = "0";
+		});
+
+		// Y slider
+		%row.add(new GuiSliderCtrl("HudLayoutOffsetYSlider" @ %name) {
+			profile = "GuiSliderProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "264 70";
+			extent = "120 36";
+			minExtent = "8 8";
+			visible = "1";
+			altCommand = "HudLayoutDlg.sliderChanged(\"" @ %name @ "\", \"Y\");";
+			helpTag = "0";
+			range = "-500 500";
+			ticks = 1000;
+			value = 0;
+			bitmap = "~/client/ui/options/slider";
+		});
+
+		%row.add(new GuiMLTextCtrl("HudLayoutOffsetYDisplay" @ %name) {
+			profile = "GuiMLTextProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "390 74";
+			extent = "50 26";
+			minExtent = "8 8";
+			visible = "1";
+			helpTag = "0";
+			lineSpacing = "2";
+			allowColorChars = "0";
+			maxChars = "-1";
+		});
+
+		// Disabled overlay shown in Default/Centered modes
+		%row.add(new GuiControl("HudLayoutDisabledOverlay" @ %name) {
+			profile = "HudLayoutDisabledRowProfile";
+			horizSizing = "right";
+			vertSizing = "bottom";
+			position = "0 0";
+			extent = "440 100";
+			minExtent = "8 8";
+			visible = "0";
+			helpTag = "0";
+		});
+
+		HudLayoutContent.add(%row);
+		%this.refreshRow(%name);
+	}
+}
+
+function HudLayoutDlg::refreshModeState(%this) {
+	%mode = $pref::HudLayoutMode;
+	if (%mode $= "")
+		%mode = 0;
+	HudLayoutModeDisplay.setText("<bold:24>" @ $HudLayout::ModeName[%mode]);
+	%this.refreshEnabledState();
+}
+
+function HudLayoutDlg::refreshEnabledState(%this) {
+	%mode = $pref::HudLayoutMode;
+	if (%mode $= "")
+		%mode = 0;
+	%active = (%mode == 2);
+
+	for (%i = 0; %i < $HudLayout::ElementCount; %i++) {
+		%name = $HudLayout::ElementName[%i];
+		%rowName = "HudLayoutRow" @ %name;
+		%overlay = "HudLayoutDisabledOverlay" @ %name;
+		if (isObject(%rowName)) {
+			%rowName.setActive(%active);
+		}
+		if (isObject(%overlay)) {
+			%overlay.setVisible(!%active);
+		}
+	}
+
+	if (%mode == 0) {
+		for (%i = 0; %i < $HudLayout::ElementCount; %i++) {
+			%this.loadRowFromPreset($HudLayout::ElementName[%i], "Default");
+		}
+	} else if (%mode == 1) {
+		for (%i = 0; %i < $HudLayout::ElementCount; %i++) {
+			%this.loadRowFromPreset($HudLayout::ElementName[%i], "Centered");
+		}
+	} else {
+		for (%i = 0; %i < $HudLayout::ElementCount; %i++) {
+			%this.refreshRow($HudLayout::ElementName[%i]);
+		}
+	}
+
+	%this.updatePreview();
+
+	if (isObject(PlayGui) && RootGui.getContent() == PlayGui) {
+		PlayGui.applyUISettings();
+	}
+}
+
+function HudLayoutDlg::loadRowFromPreset(%this, %name, %preset) {
+	$HudLayout::UpdatingUI = true;
+	%anchor = HudLayout::getPresetValue(%preset, %name, "Anchor", 4);
+	%offsetX = HudLayout::getPresetValue(%preset, %name, "OffsetX", 0);
+	%offsetY = HudLayout::getPresetValue(%preset, %name, "OffsetY", 0);
+
+	%anchorCtrl = "HudLayoutAnchorValue" @ %name;
+	%xSlider = "HudLayoutOffsetXSlider" @ %name;
+	%xDisplay = "HudLayoutOffsetXDisplay" @ %name;
+	%ySlider = "HudLayoutOffsetYSlider" @ %name;
+	%yDisplay = "HudLayoutOffsetYDisplay" @ %name;
+
+	if (isObject(%anchorCtrl))
+		%anchorCtrl.setText("<bold:20>" @ PlayGui::getHudAnchorName(%anchor));
+	if (isObject(%xSlider))
+		%xSlider.setValue(%offsetX);
+	if (isObject(%xDisplay))
+		%xDisplay.setText("<bold:20>" @ %offsetX);
+	if (isObject(%ySlider))
+		%ySlider.setValue(%offsetY);
+	if (isObject(%yDisplay))
+		%yDisplay.setText("<bold:20>" @ %offsetY);
+	$HudLayout::UpdatingUI = false;
+}
+
+function HudLayoutDlg::modeDecrease() {
+	%mode = $pref::HudLayoutMode;
+	if (%mode $= "")
+		%mode = 0;
+	%mode--;
+	if (%mode < 0)
+		%mode = $HudLayout::ModeCount - 1;
+	$pref::HudLayoutMode = %mode;
+	HudLayoutDlg.refreshModeState();
+}
+
+function HudLayoutDlg::modeIncrease() {
+	%mode = $pref::HudLayoutMode;
+	if (%mode $= "")
+		%mode = 0;
+	%mode++;
+	if (%mode >= $HudLayout::ModeCount)
+		%mode = 0;
+	$pref::HudLayoutMode = %mode;
+	HudLayoutDlg.refreshModeState();
+}
+
+function HudLayoutDlg::refreshRow(%this, %name) {
+	$HudLayout::UpdatingUI = true;
+	%anchor = HudLayout::getPref(%name, "Anchor", 4);
+	%offsetX = HudLayout::getPref(%name, "OffsetX", 0);
+	%offsetY = HudLayout::getPref(%name, "OffsetY", 0);
+
+	%anchorCtrl = "HudLayoutAnchorValue" @ %name;
+	%xSlider = "HudLayoutOffsetXSlider" @ %name;
+	%xDisplay = "HudLayoutOffsetXDisplay" @ %name;
+	%ySlider = "HudLayoutOffsetYSlider" @ %name;
+	%yDisplay = "HudLayoutOffsetYDisplay" @ %name;
+
+	if (isObject(%anchorCtrl))
+		%anchorCtrl.setText("<bold:20>" @ PlayGui::getHudAnchorName(%anchor));
+	if (isObject(%xSlider))
+		%xSlider.setValue(%offsetX);
+	if (isObject(%xDisplay))
+		%xDisplay.setText("<bold:20>" @ %offsetX);
+	if (isObject(%ySlider))
+		%ySlider.setValue(%offsetY);
+	if (isObject(%yDisplay))
+		%yDisplay.setText("<bold:20>" @ %offsetY);
+	$HudLayout::UpdatingUI = false;
+}
+
+function HudLayoutDlg::shiftAnchor(%this, %name, %delta) {
+	%mode = $pref::HudLayoutMode;
+	if (%mode !$= "2")
+		return;
+
+	%anchor = mFloor(HudLayout::getPref(%name, "Anchor", 4) + %delta);
+	if (%anchor < 0) {
+		%anchor = 8;
+	} else if (%anchor > 8) {
+		%anchor = 0;
+	}
+	HudLayout::setPref(%name, "Anchor", %anchor);
+
+	// Reset offsets to 0 when anchor changes
+	HudLayout::setPref(%name, "OffsetX", 0);
+	HudLayout::setPref(%name, "OffsetY", 0);
+
+	%this.refreshRow(%name);
+	%this.updatePreview();
+	if (isObject(PlayGui) && RootGui.getContent() == PlayGui) {
+		PlayGui.applyUISettings();
+	}
+}
+
+function HudLayoutDlg::sliderChanged(%this, %name, %axis) {
+	%mode = $pref::HudLayoutMode;
+	if (%mode !$= "2" || $HudLayout::UpdatingUI)
+		return;
+
+	%slider = "HudLayoutOffset" @ %axis @ "Slider" @ %name;
+	%display = "HudLayoutOffset" @ %axis @ "Display" @ %name;
+	%value = %slider.getValue();
+
+	// Round to whole number
+	%value = mFloor(%value + 0.5);
+
+	if (%axis $= "X") {
+		HudLayout::setPref(%name, "OffsetX", %value);
+	} else {
+		HudLayout::setPref(%name, "OffsetY", %value);
+	}
+
+	if (isObject(%display))
+		%display.setText("<bold:20>" @ %value);
+
+	%this.updatePreview();
+
+	if (isObject(PlayGui) && RootGui.getContent() == PlayGui) {
+		PlayGui.applyUISettings();
+	}
+}
+
+function HudLayoutDlg::resetDefaults(%this) {
+	HudLayout::setPref("Gem", "Anchor", 0);
+	HudLayout::setPref("Gem", "OffsetX", 0);
+	HudLayout::setPref("Gem", "OffsetY", 0);
+	HudLayout::setPref("Timer", "Anchor", 1);
+	HudLayout::setPref("Timer", "OffsetX", 0);
+	HudLayout::setPref("Timer", "OffsetY", 0);
+	HudLayout::setPref("Powerup", "Anchor", 2);
+	HudLayout::setPref("Powerup", "OffsetX", 0);
+	HudLayout::setPref("Powerup", "OffsetY", 0);
+	HudLayout::setPref("Blast", "Anchor", 6);
+	HudLayout::setPref("Blast", "OffsetX", 0);
+	HudLayout::setPref("Blast", "OffsetY", 0);
+
+	for (%i = 0; %i < $HudLayout::ElementCount; %i++) {
+		%this.refreshRow($HudLayout::ElementName[%i]);
+	}
+	%this.updatePreview();
+	if (isObject(PlayGui) && RootGui.getContent() == PlayGui) {
+		PlayGui.applyUISettings();
+	}
+}
